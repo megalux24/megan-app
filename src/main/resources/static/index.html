@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Megan - Tu Asistente de Plantas</title>
+    <!-- Enlace a Font Awesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Enlace a tu archivo CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Enlace a Tailwind CSS CDN para estilos rápidos y responsivos -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Fuentes personalizadas */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center p-4">
+
+    <div class="container mx-auto max-w-4xl bg-white shadow-lg rounded-lg p-6 md:p-8">
+        <h1 class="text-4xl font-bold text-center text-green-700 mb-8">🌿 Megan: Tu Asistente de Plantas</h1>
+
+        <!-- Sección de Autenticación (Login/Registro) -->
+        <div id="auth-section" class="mb-8">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4 text-center">Bienvenido a Megan</h2>
+            <div class="flex justify-center space-x-4 mb-6">
+                <button id="show-login-btn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-300">Iniciar Sesión</button>
+                <button id="show-register-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-300">Registrarse</button>
+            </div>
+
+            <!-- Formulario de Login -->
+            <form id="login-form" class="hidden bg-gray-50 p-6 rounded-lg shadow-inner">
+                <h3 class="text-xl font-medium text-gray-700 mb-4">Iniciar Sesión</h3>
+                <div class="mb-4">
+                    <label for="login-email" class="block text-gray-700 text-sm font-bold mb-2">Email:</label>
+                    <input type="email" id="login-email" name="email" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                </div>
+                <div class="mb-6">
+                    <label for="login-password" class="block text-gray-700 text-sm font-bold mb-2">Contraseña:</label>
+                    <input type="password" id="login-password" name="password" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline" required>
+                </div>
+                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md w-full shadow-md transition duration-300">Entrar</button>
+                <p id="login-message" class="text-center text-sm mt-4"></p>
+            </form>
+
+            <!-- Formulario de Registro -->
+            <form id="register-form" class="hidden bg-gray-50 p-6 rounded-lg shadow-inner">
+                <h3 class="text-xl font-medium text-gray-700 mb-4">Registrarse</h3>
+                <div class="mb-4">
+                    <label for="register-name" class="block text-gray-700 text-sm font-bold mb-2">Nombre:</label>
+                    <input type="text" id="register-name" name="nombre" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                </div>
+                <div class="mb-4">
+                    <label for="register-email" class="block text-gray-700 text-sm font-bold mb-2">Email:</label>
+                    <input type="email" id="register-email" name="email" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                </div>
+                <div class="mb-6">
+                    <label for="register-password" class="block text-gray-700 text-sm font-bold mb-2">Contraseña:</label>
+                    <input type="password" id="register-password" name="password" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline" required>
+                </div>
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md w-full shadow-md transition duration-300">Crear Cuenta</button>
+                <p id="register-message" class="text-center text-sm mt-4"></p>
+            </form>
+        </div>
+
+        <!-- Sección Principal de la Aplicación (oculta hasta el login) -->
+        <div id="app-section" class="hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-semibold text-gray-800">Mis Plantas</h2>
+                <div class="flex space-x-2">
+                    <button id="add-plant-btn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-300"><i class="fas fa-plus-circle mr-2"></i>Añadir Planta</button>
+                    <button id="logout-btn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-300"><i class="fas fa-sign-out-alt mr-2"></i>Salir</button>
+                </div>
+            </div>
+
+            <!-- Lista de Plantas -->
+            <div id="plant-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                <!-- Las plantas se cargarán aquí dinámicamente -->
+                <p class="text-center text-gray-500 col-span-full">Cargando plantas...</p>
+            </div>
+
+            <!-- Sección de Notificaciones -->
+            <div id="notifications-section" class="mb-8 bg-yellow-50 p-6 rounded-lg shadow-inner">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4 flex items-center"><i class="fas fa-bell mr-2 text-yellow-600"></i>Notificaciones</h3>
+                <div id="notification-list">
+                    <p class="text-center text-gray-500">No tienes notificaciones nuevas.</p>
+                    <!-- Las notificaciones se cargarán aquí dinámicamente -->
+                </div>
+            </div>
+
+            <!-- Formulario para Añadir/Editar Planta (oculto por defecto) -->
+            <div id="plant-form-modal" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center p-4 hidden">
+                <div class="bg-white rounded-lg shadow-xl p-6 md:p-8 w-full max-w-md">
+                    <h3 id="plant-form-title" class="text-2xl font-semibold text-gray-800 mb-6 text-center">Añadir Nueva Planta</h3>
+                    <form id="plant-form" enctype="multipart/form-data">
+                        <input type="hidden" id="plant-id">
+                        <input type="hidden" id="plant-user-id"> <!-- Para asociar la planta al usuario logueado -->
+
+                        <div class="mb-4">
+                            <label for="nombreComun" class="block text-gray-700 text-sm font-bold mb-2">Nombre Común:</label>
+                            <input type="text" id="nombreComun" name="nombreComun" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                        </div>
+                        <div class="mb-4">
+                            <label for="nombreCientifico" class="block text-gray-700 text-sm font-bold mb-2">Nombre Científico:</label>
+                            <input type="text" id="nombreCientifico" name="nombreCientifico" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        </div>
+                        <div class="mb-4">
+                            <label for="ubicacion" class="block text-gray-700 text-sm font-bold mb-2">Ubicación:</label>
+                            <input type="text" id="ubicacion" name="ubicacion" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        </div>
+                        <div class="mb-4">
+                            <label for="fechaAdquisicion" class="block text-gray-700 text-sm font-bold mb-2">Fecha de Adquisición:</label>
+                            <input type="date" id="fechaAdquisicion" name="fechaAdquisicion" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        </div>
+                        <div class="mb-4">
+                            <label for="notas" class="block text-gray-700 text-sm font-bold mb-2">Notas:</label>
+                            <textarea id="notas" name="notas" rows="3" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
+                        </div>
+                        <div class="mb-4">
+                            <label for="frecuenciaRiegoDias" class="block text-gray-700 text-sm font-bold mb-2">Frecuencia de Riego (días):</label>
+                            <input type="number" id="frecuenciaRiegoDias" name="frecuenciaRiegoDias" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" min="1">
+                        </div>
+                        <div class="mb-6">
+                            <label for="foto" class="block text-gray-700 text-sm font-bold mb-2">Foto de la Planta:</label>
+                            <input type="file" id="foto" name="foto" accept="image/*" class="w-full text-gray-700">
+                            <p class="text-xs text-gray-500 mt-1">Sube una imagen (JPG, PNG, GIF).</p>
+                        </div>
+                        <div class="flex justify-end space-x-4">
+                            <button type="button" id="cancel-plant-form-btn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-md shadow-md transition duration-300">Cancelar</button>
+                            <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-300">Guardar Planta</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Modal para Registrar Riego (oculto por defecto) -->
+            <div id="water-plant-modal" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center p-4 hidden">
+                <div class="bg-white rounded-lg shadow-xl p-6 md:p-8 w-full max-w-md">
+                    <h3 class="text-2xl font-semibold text-gray-800 mb-6 text-center">Registrar Riego para <span id="water-plant-name" class="text-green-700"></span></h3>
+                    <form id="water-plant-form">
+                        <input type="hidden" id="water-plant-id">
+                        <div class="mb-4">
+                            <label for="cantidadAguaMl" class="block text-gray-700 text-sm font-bold mb-2">Cantidad de Agua (ml):</label>
+                            <input type="number" id="cantidadAguaMl" name="cantidadAguaMl" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" min="0" step="0.01" required>
+                        </div>
+                        <div class="mb-6">
+                            <label for="observacionesRiego" class="block text-gray-700 text-sm font-bold mb-2">Observaciones:</label>
+                            <textarea id="observacionesRiego" name="observacionesRiego" rows="3" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
+                        </div>
+                        <div class="flex justify-end space-x-4">
+                            <button type="button" id="cancel-water-plant-btn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-md shadow-md transition duration-300">Cancelar</button>
+                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-300">Registrar Riego</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div> <!-- Fin de app-section -->
+    </div> <!-- Fin de container -->
+
+    <!-- Enlace a tu archivo JavaScript -->
+    <script src="js/script.js"></script>
+</body>
+</html>
+

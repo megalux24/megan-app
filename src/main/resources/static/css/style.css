@@ -1,0 +1,161 @@
+/*
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to edit this template
+*/
+/* 
+    Created on : 26 jul 2025, 12:47:28 p.m.
+    Author     : lucasayala
+/*
+  Este archivo CSS es para estilos personalizados que no se manejan fácilmente con Tailwind CSS,
+  o para ajustes específicos que Tailwind no cubre directamente.
+  La mayoría de los estilos de layout y componentes se manejarán con clases de Tailwind directamente en el HTML.
+*/
+
+/* Ocultar elementos con la clase 'hidden' */
+.hidden {
+    display: none !important;
+}
+
+/* Estilos para el body */
+body {
+    background-color: #f3f4f6; /* bg-gray-100 de Tailwind */
+    font-family: 'Inter', sans-serif; /* Fuente Inter */
+}
+
+/* Estilos para el contenedor principal */
+.container {
+    max-width: 960px; /* Ancho máximo */
+    width: 100%; /* Ocupa todo el ancho disponible */
+    margin: 2rem auto; /* Margen superior/inferior y centrado horizontal */
+    background-color: #ffffff; /* Fondo blanco */
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-lg de Tailwind */
+    border-radius: 0.5rem; /* rounded-lg de Tailwind */
+    padding: 2rem; /* p-8 de Tailwind */
+}
+
+/* Estilos para los formularios */
+form {
+    border: 1px solid #e5e7eb; /* border de Tailwind */
+    border-radius: 0.5rem; /* rounded-lg de Tailwind */
+    padding: 1.5rem; /* p-6 de Tailwind */
+    box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06); /* shadow-inner de Tailwind */
+}
+
+/* Estilos para campos de input y textarea */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="date"],
+textarea {
+    border-width: 1px; /* border de Tailwind */
+    border-color: #d1d5db; /* border-gray-300 de Tailwind */
+    border-radius: 0.25rem; /* rounded de Tailwind */
+    padding: 0.5rem 0.75rem; /* py-2 px-3 de Tailwind */
+    color: #374151; /* text-gray-700 de Tailwind */
+    line-height: 1.25; /* leading-tight de Tailwind */
+    width: 100%; /* w-full de Tailwind */
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* shadow de Tailwind */
+    transition: all 0.15s ease-in-out;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+input[type="date"]:focus,
+textarea:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5); /* focus:shadow-outline de Tailwind (blue-500) */
+    border-color: #3b82f6; /* focus:border-blue-500 de Tailwind */
+}
+
+/* Estilos para botones */
+button {
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+/* Estilos para tarjetas de planta */
+.plant-card {
+    background-color: #f9fafb; /* bg-gray-50 */
+    border: 1px solid #e5e7eb; /* border-gray-200 */
+    border-radius: 0.5rem; /* rounded-lg */
+    padding: 1.5rem; /* p-6 */
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); /* shadow-md */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.plant-card img {
+    max-width: 100%;
+    height: 150px; /* Altura fija para las imágenes */
+    object-fit: cover; /* Asegura que la imagen cubra el área sin distorsionarse */
+    border-radius: 0.25rem; /* rounded */
+    margin-bottom: 1rem;
+    display: block; /* Elimina espacio extra debajo de la imagen */
+}
+
+/* Indicador de necesidad de riego */
+.needs-watering-indicator {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: #ef4444; /* bg-red-500 */
+    margin-left: 0.5rem;
+    vertical-align: middle;
+}
+
+/* Estilos para notificaciones */
+.notification-item {
+    background-color: #fffbeb; /* bg-yellow-100 */
+    border: 1px solid #fcd34d; /* border-yellow-400 */
+    border-radius: 0.375rem; /* rounded-md */
+    padding: 0.75rem 1rem; /* py-3 px-4 */
+    margin-bottom: 0.75rem; /* mb-3 */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+    color: #4b5563; /* text-gray-700 */
+}
+
+.notification-item.read {
+    background-color: #e5e7eb; /* bg-gray-200 */
+    color: #6b7280; /* text-gray-600 */
+    opacity: 0.7;
+}
+
+.notification-item button {
+    background-color: #3b82f6; /* bg-blue-500 */
+    color: white;
+    padding: 0.3rem 0.6rem;
+    font-size: 0.8rem;
+    border-radius: 0.25rem;
+    margin-left: 1rem;
+}
+.notification-item button:hover {
+    background-color: #2563eb; /* bg-blue-600 */
+}
+
+/* Estilos para mensajes de error/éxito */
+.message-success {
+    color: #10b981; /* green-500 */
+    font-weight: bold;
+}
+
+.message-error {
+    color: #ef4444; /* red-500 */
+    font-weight: bold;
+}
+
+/* Media queries para responsividad (ejemplo, Tailwind ya hace mucho) */
+@media (min-width: 768px) {
+    .container {
+        padding: 3rem; /* md:p-12 */
+    }
+}
+
+

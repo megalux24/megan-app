@@ -37,7 +37,7 @@ public class Planta {
     @Column(name = "ubicacion", length = 100)
     private String ubicacion; 
     
-    @Column(name = "fecha:adquisicion")
+    @Column(name = "fecha_adquisicion")
     private LocalDate fechaAdquisicion; 
     
     @Column(name = "notas", columnDefinition = "TEXT")
@@ -46,7 +46,7 @@ public class Planta {
     @Column(name = "frecuencia_riego_dias")
     private Integer frecuenciaRiegoDias; // Integer para permitir null si no se especifica, al ser un objeto y no un dato primitivo.
     
-    @Lob // Indica que el campo es un Large I¡Object. Usamos de esta manera ya que el desarrollo de la app es para fines educativos, ya en entornos de producción se usaría una nube para cargar las imagenes 
+    @Lob // en entornos de producción se usaría una nube para cargar las imagenes 
     @Column(name = "foto_planta")
     private byte[] fotoPlanta; // datatype para BLOBs
     
