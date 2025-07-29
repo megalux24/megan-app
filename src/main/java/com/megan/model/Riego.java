@@ -1,11 +1,12 @@
 // src/main/java/com/megan/model/Riego.java
 package com.megan.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonIgnore; // Importar JsonIgnore
+
 
 @Entity
 @Table(name = "riegos")
@@ -15,9 +16,8 @@ public class Riego {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_riego")
     private Long idRiego;
-
-    // IGNORAR la Planta al serializar Riego para evitar recursión
-    @JsonIgnore // <--- AÑADIR ESTA ANOTACIÓN
+    
+    @JsonIgnore 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_planta", nullable = false)
     private Planta planta;
@@ -94,12 +94,12 @@ public class Riego {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Riego riego = (Riego) o;
-        return Objects.equals(idRiego, riego.idRiego);
+        return Objects.equals(this.idRiego, riego.idRiego);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(idRiego);
+        return Objects.hash(this.idRiego);
     }
 
     @Override

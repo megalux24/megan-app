@@ -2,8 +2,7 @@
 Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
 Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to edit this template
 */
-/* 
-    Created on : 26 jul 2025, 12:47:28 p.m.
+/* Created on : 26 jul 2025, 12:47:28 p.m.
     Author     : lucasayala
 /*
   Este archivo CSS es para estilos personalizados que no se manejan fácilmente con Tailwind CSS,
@@ -157,5 +156,3 @@ button {
         padding: 3rem; /* md:p-12 */
     }
 }
-
-

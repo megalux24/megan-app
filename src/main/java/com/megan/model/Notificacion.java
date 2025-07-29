@@ -1,17 +1,12 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
+// src/main/java/com/megan/model/Notificacion.java
 package com.megan.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import com.fasterxml.jackson.annotation.JsonBackReference; // Importar JsonBackReference
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
-/**
- *
- * @author lucasayala
- */
 @Entity
 @Table(name = "notificaciones")
 public class Notificacion {
@@ -22,10 +17,14 @@ public class Notificacion {
     private Long idNotificacion;
     
     // Relación muchos a uno con Usuario: Una notificación pertenece a un usuario
-    @ManyToOne(fetch = FetchType.LAZY)// para que cuándo se cargue la notificación, no deba recuperar el Usuario also. (mejora el rendimiento) 
+    // @JsonBackReference indica que esta es la parte "de vuelta" de la relación
+    @JsonBackReference("usuario-notificaciones") 
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_usuario", nullable = false)
     private Usuario usuario; // Objeto Usuario al que pertenece esta notificación
     
+    // hay que evitar la recursión infinita con JsonIgnore
+    @JsonIgnore 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_planta")
     private Planta planta;
@@ -133,10 +132,9 @@ public class Notificacion {
     public String toString() {
         return "Notificacion{" +
                "idNotificacion=" + idNotificacion +
-               ", textoNotificacion='" + textoNotificacion + '\'' +
+               ", textoNotificacion='" + textoNotificacion + '\'' + 
                ", fechaNotificacion=" + fechaNotificacion +
                ", leida=" + leida +
                '}';
     }
-    
 }

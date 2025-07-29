@@ -5,7 +5,8 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonIgnore; // Importar JsonIgnore
+import com.fasterxml.jackson.annotation.JsonManagedReference; // Importar JsonManagedReference para el manejo correcto
+
 
 @Entity
 @Table(name = "usuarios")
@@ -28,10 +29,16 @@ public class Usuario {
     @Column(name = "fecha_registro", nullable = false)
     private LocalDateTime fechaRegistro;
 
-    // IGNORAR esta relación al serializar Usuario para evitar recursión infinita
-    @JsonIgnore // <--- AÑADIR ESTA ANOTACIÓN
+    // Relación One-to-Many con Plantas: Un usuario puede tener muchas plantas
+    // @JsonManagedReference indica que esta es la parte "gestora" de la relación y se serializará normalmente.                        
+    @JsonManagedReference("usuario-plantas") 
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Planta> plantas;
+    
+    // Relación One-to-Many con Notificaciones: Un usuario puede tener muchas notificaciones
+    @JsonManagedReference("usuario-notificaciones") 
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Notificacion> notificaciones;
 
     public Usuario() {
     }
@@ -99,18 +106,26 @@ public class Usuario {
     public void setPlantas(List<Planta> plantas) {
         this.plantas = plantas;
     }
+    
+     public List<Notificacion> getNotificaciones() { 
+         return notificaciones; 
+     }
+     
+     public void setNotificaciones(List<Notificacion> notificaciones) { 
+         this.notificaciones = notificaciones; 
+     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Usuario usuario = (Usuario) o;
-        return Objects.equals(idUsuario, usuario.idUsuario);
+        return Objects.equals(this.idUsuario, usuario.idUsuario);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(idUsuario);
+        return Objects.hash(this.idUsuario);
     }
 
     @Override

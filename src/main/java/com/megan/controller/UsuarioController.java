@@ -1,102 +1,157 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.megan.controller;
 
 import com.megan.model.Usuario;
 import com.megan.service.UsuarioService;
+import java.net.URI;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import org.springframework.dao.DataIntegrityViolationException;
+import java.util.stream.Collectors;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-/**
- *
- * @author lucasayala
- */
 @RestController
-@RequestMapping("api/usuarios")//ruta base para todos los endpoints de este controller
+@RequestMapping("api/usuarios")
 public class UsuarioController {
-    //prepara al UsuarioController para recibir y utilizar una instancia del UsuarioService, 
-    //que es el componente que contiene la lógica de negocio para gestionar los usuarios
-    private final UsuarioService usuarioService; //final porque solo se instancia una vez
-    
-    @Autowired // Inyección de dependencias del UsuarioService, le inyectamos penicilina para que maneje la infexion 
-    public UsuarioController(UsuarioService usuarioService) {
+
+    private final UsuarioService usuarioService;
+    private final AuthenticationManager authenticationManager;
+
+    @Autowired
+    public UsuarioController(UsuarioService usuarioService, AuthenticationManager authenticationManager) {
         this.usuarioService = usuarioService;
+        this.authenticationManager = authenticationManager;
     }
-    
-    @PostMapping("/registrar") 
-    public ResponseEntity<Usuario> registrarUsuario(@RequestBody Usuario usuario) {
+
+    // DTO (Data Transfer Object) para datos de entrada/salida.
+    public static class UserInfo {
+        private Long idUsuario;
+        private String nombre;
+        private String email;
+
+        public UserInfo(Long idUsuario, String nombre, String email) {
+            this.idUsuario = idUsuario;
+            this.nombre = nombre;
+            this.email = email;
+        }
+        // Getters y Setters
+        public Long getIdUsuario() { return idUsuario; }
+        public void setIdUsuario(Long idUsuario) { this.idUsuario = idUsuario; }
+        public String getNombre() { return nombre; }
+        public void setNombre(String nombre) { this.nombre = nombre; }
+        public String getEmail() { return email; }
+        public void setEmail(String email) { this.email = email; }
+    }
+
+    // DTO para el login
+    public static class LoginRequest {
+        private String email;
+        private String password;
+        public String getEmail() { return email; }
+        public void setEmail(String email) { this.email = email; }
+        public String getPassword() { return password; }
+        public void setPassword(String password) { this.password = password; }
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> autenticarUsuario(@RequestBody LoginRequest loginRequest) {
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
+            );
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            Optional<Usuario> usuarioOpt = usuarioService.findByEmail(loginRequest.getEmail());
+            if (usuarioOpt.isPresent()) {
+                UserInfo userInfo = new UserInfo(usuarioOpt.get().getIdUsuario(), usuarioOpt.get().getNombre(), usuarioOpt.get().getEmail());
+                return ResponseEntity.ok(userInfo);
+            } else {
+                return new ResponseEntity<>("Error interno: Usuario autenticado no encontrado.", HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        } catch (Exception e) {
+            return new ResponseEntity<>("Credenciales inválidas.", HttpStatus.UNAUTHORIZED);
+        }
+    }
+
+        @PostMapping("/registrar")
+    public ResponseEntity<Void> registrarUsuario(@RequestBody Usuario usuario) {
+        System.out.println("---[CONTROLLER] Entrando a registrarUsuario...");
         try {
             Usuario nuevoUsuario = usuarioService.registrarUsuario(usuario);
-            return new ResponseEntity<>(nuevoUsuario, HttpStatus.CREATED); // Devuelve 201 Created
-        } catch (DataIntegrityViolationException e) {
-            // Esto ocurre, por ejemplo, si el email ya existe (debido a la restricción UNIQUE en la DB)
-            return new ResponseEntity<>(HttpStatus.CONFLICT); // Devuelve 409 Conflict
+            
+            System.out.println("---[CONTROLLER] Usuario registrado en el servicio. ID: " + nuevoUsuario.getIdUsuario());
+
+            URI location = ServletUriComponentsBuilder
+                    .fromCurrentRequest().path("/{id}")
+                    .buildAndExpand(nuevoUsuario.getIdUsuario()).toUri();
+
+            System.out.println("---[CONTROLLER] Ubicación creada. Preparando para devolver ResponseEntity...");
+            
+            ResponseEntity<Void> response = ResponseEntity.created(location).build();
+
+            System.out.println("---[CONTROLLER] ResponseEntity creado. Saliendo del método.");
+            return response;
+
         } catch (Exception e) {
-            // Captura cualquier otra excepción inesperada
-            // logger.error("Error inesperado al registrar usuario", e);
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR); // Devuelve 500 Internal Server Error
+            System.out.println("---[CONTROLLER] ERROR en registrarUsuario: " + e.getMessage());
+            // Si el error es el StackOverflow, este log podría no aparecer.
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-    
-    // Endpoint para autenticar un usuario
-    // Espera un JSON con "email" y "password"
-    @PostMapping("/login")
-    public ResponseEntity<String> loginUsuario(@RequestBody Map<String, String> credentials) {
-        String email = credentials.get("email");
-        String password = credentials.get("password");
-
-        if (email == null || password == null) {
-            return new ResponseEntity<>("Email y contraseña son requeridos", HttpStatus.BAD_REQUEST);
-        }
-
-        Optional<Usuario> usuarioAutenticado = usuarioService.autenticarUsuario(email, password);
-
-        if (usuarioAutenticado.isPresent()) {
-            // En una aplicación real, aquí se generaría un token JWT o se establecería una sesión
-            return new ResponseEntity<>("Autenticación exitosa para el usuario: " + usuarioAutenticado.get().getEmail(), HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>("Credenciales inválidas", HttpStatus.UNAUTHORIZED); // Devuelve 401 Unauthorized
-        }
-    }
-    
+        
     @GetMapping("/{id}")
-    public ResponseEntity<Usuario> getUsuarioById(@PathVariable Long id) {
-        Optional<Usuario> usuario = usuarioService.getUsuarioById(id);
-        return usuario.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
-                      .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND)); // Devuelve 404 Not Found si no existe
+    public ResponseEntity<?> getUsuarioById(@PathVariable Long id) {
+        Optional<Usuario> usuarioOpt = usuarioService.getUsuarioById(id);
+        if (usuarioOpt.isPresent()) {
+            UserInfo userInfo = new UserInfo(usuarioOpt.get().getIdUsuario(), usuarioOpt.get().getNombre(), usuarioOpt.get().getEmail());
+            return new ResponseEntity<>(userInfo, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
     
     @GetMapping
-    public ResponseEntity<List<Usuario>> getAllUsuarios() {
-        List<Usuario> usuarios = usuarioService.getAllUsuarios();
-        return new ResponseEntity<>(usuarios, HttpStatus.OK);
+    public ResponseEntity<List<UserInfo>> getUsuarios(@RequestParam(required = false) String email) {
+        if (email != null && !email.isEmpty()) {
+            // Devuelve una lista (aunque sea de un solo elemento) para mantener el tipo de respuesta consistente
+            List<UserInfo> userInfoList = usuarioService.findByEmail(email)
+                .stream()
+                .map(u -> new UserInfo(u.getIdUsuario(), u.getNombre(), u.getEmail()))
+                .collect(Collectors.toList());
+            return new ResponseEntity<>(userInfoList, HttpStatus.OK);
+        } else {
+            List<UserInfo> userInfos = usuarioService.getAllUsuarios().stream()
+                .map(u -> new UserInfo(u.getIdUsuario(), u.getNombre(), u.getEmail()))
+                .collect(Collectors.toList());
+            return new ResponseEntity<>(userInfos, HttpStatus.OK);
+        }
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<Usuario> updateUsuario(@PathVariable Long id, @RequestBody Usuario usuarioDetails) {
-        Usuario updatedUsuario = usuarioService.updateUsuario(id, usuarioDetails);
-        if (updatedUsuario != null) {
-            return new ResponseEntity<>(updatedUsuario, HttpStatus.OK);
+    public ResponseEntity<?> updateUsuario(@PathVariable Long id, @RequestBody Usuario usuarioDetails) {
+        try {
+            Usuario updatedUsuario = usuarioService.updateUsuario(id, usuarioDetails);
+            UserInfo userInfo = new UserInfo(updatedUsuario.getIdUsuario(), updatedUsuario.getNombre(), updatedUsuario.getEmail());
+            return new ResponseEntity<>(userInfo, HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND); // Devuelve 404 Not Found
     }
     
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUsuario(@PathVariable Long id) {
-        usuarioService.deleteUsuario(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT); // Devuelve 204 No Content
+        try {
+            usuarioService.deleteUsuario(id);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
-    
-    
-    
-    
 }

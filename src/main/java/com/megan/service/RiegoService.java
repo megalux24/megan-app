@@ -1,77 +1,73 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.megan.service;
 
-import com.megan.model.Notificacion; 
+import com.megan.controller.RiegoRequestDTO;
+import com.megan.model.Notificacion;
 import com.megan.model.Planta;
 import com.megan.model.Riego;
 import com.megan.model.repository.PlantaRepository;
 import com.megan.model.repository.RiegoRepository;
+import java.math.BigDecimal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-/**
- *
- * @author lucasayala
- */
+
 @Service
 public class RiegoService {
-    // inyectamos dependencias y otros componentes necesarios para realizar tareas
-    private final RiegoRepository riegoRepository; //para interactuar con la tabla riegos 
-    private final PlantaRepository plantaRepository; // para interactuar con la tabla plantas
-    private final NotificacionService notificacionService; // para crear y gestionar las notif. relacionadas con los riegos 
-    
-    //constructor fundamental para que Spring pueda proporcionarle a RiegoService todas las dependencias que necesita para funcionar correctamente.
-    @Autowired //"autocableado", la magia de Spring que automatiza la conexión con otros componentes del programa
+    private final RiegoRepository riegoRepository;
+    private final PlantaRepository plantaRepository;
+    private final NotificacionService notificacionService;
+
+    @Autowired
     public RiegoService(RiegoRepository riegoRepository, PlantaRepository plantaRepository, NotificacionService notificacionService) {
         this.riegoRepository = riegoRepository;
         this.plantaRepository = plantaRepository;
-        this.notificacionService = notificacionService; 
+        this.notificacionService = notificacionService;
     }
     
-    // Método para registrar un nuevo riego
-    public Riego registrarRiego(Riego riego) {
-        riego.setFechaHoraRiego(LocalDateTime.now()); //que la FechaHoraRiego sea la actual!
-        
-            // Actualizar la ultimaFechaRiego de la planta asociada
-        Optional<Planta> optionalPlanta = plantaRepository.findById(riego.getPlanta().getIdPlanta());
-        if (optionalPlanta.isPresent()) {
-            Planta planta = optionalPlanta.get();
-            planta.setUltimaFechaRiego(riego.getFechaHoraRiego()); // Establecer la fecha del riego actual, que usamos LocalDateTime.now()
-            plantaRepository.save(planta); // Guardar la planta actualizada
+    public Riego registrarRiego(RiegoRequestDTO riegoRequest) {
+        // Buscamos la planta usando el ID del DTO
+        Planta planta = plantaRepository.findById(riegoRequest.getPlantaId())
+                .orElseThrow(() -> new IllegalArgumentException("Planta no encontrada con ID: " + riegoRequest.getPlantaId()));
 
-            // Generar una notificación de confirmación de riego
-            String textoNotificacion = "¡Riego registrado para tu planta " + planta.getNombreComun() + "!";
-            notificacionService.crearNotificacion(planta.getUsuario(), planta, textoNotificacion);
-
-        } else {
-            System.err.println("Error: Planta con ID " + riego.getPlanta().getIdPlanta() + " no encontrada para registrar riego.");
-            
+        // Creamos el nuevo objeto Riego
+        Riego nuevoRiego = new Riego();
+        nuevoRiego.setPlanta(planta);
+        nuevoRiego.setFechaHoraRiego(LocalDateTime.now());
+        nuevoRiego.setObservaciones(riegoRequest.getObservaciones());
+        if (riegoRequest.getCantidadAguaMl() != null) {
+            nuevoRiego.setCantidadAguaMl(BigDecimal.valueOf(riegoRequest.getCantidadAguaMl()));
         }
-        return riegoRepository.save(riego);
-    }    
+        
+        // Actualizamos la última fecha de riego en la planta
+        planta.setUltimaFechaRiego(nuevoRiego.getFechaHoraRiego());
+        plantaRepository.save(planta);
 
-        
-        
-    // Método para obtener un riego por su ID
+        // Generamos la notificación
+        String textoNotificacion = "Riego registrado para tu planta " + planta.getNombreComun();
+        notificacionService.crearNotificacion(planta.getUsuario(), planta, textoNotificacion);
+
+        // Guardamos y devolvemos el nuevo riego
+        return riegoRepository.save(nuevoRiego);
+    }    
+    
+    public List<Riego> getRiegosByPlantaId(Long plantaId) {
+        return plantaRepository.findById(plantaId)
+                .map(riegoRepository::findByPlanta)
+                .orElse(Collections.emptyList());
+    }
+
     public Optional<Riego> getRiegoById(Long id) {
         return riegoRepository.findById(id);
     }
 
-    // Método para obtener todos los riegos de una planta específica
     public List<Riego> getRiegosByPlanta(Planta planta) {
         return riegoRepository.findByPlanta(planta);
     }
 
-    // Método para eliminar un riego
     public void deleteRiego(Long id) {
         riegoRepository.deleteById(id);
     }
 }
-    
-

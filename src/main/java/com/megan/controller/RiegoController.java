@@ -1,12 +1,8 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.megan.controller;
 
-import com.megan.model.Planta; //para asociar el riego a la planta
+import com.megan.model.Planta;
 import com.megan.model.Riego;
-import com.megan.service.PlantaService; //para obtener la planta
+import com.megan.service.PlantaService;
 import com.megan.service.RiegoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -34,21 +30,16 @@ public class RiegoController {
     
     // registrar un riego para una planta 
     @PostMapping
-    public ResponseEntity<Riego> registrarRiego(@RequestBody Riego riego) {
-        // Asegurarse de que el riego tenga una planta asociada válida
-        if (riego.getPlanta() == null || riego.getPlanta().getIdPlanta() == null) {
-            return new ResponseEntity("El ID de la planta es requerido para registrar un riego.", HttpStatus.BAD_REQUEST);
+    public ResponseEntity<Riego> registrarRiego(@RequestBody RiegoRequestDTO riegoRequest) {
+        try {
+              Riego nuevoRiego = riegoService.registrarRiego(riegoRequest);
+            return new ResponseEntity<>(nuevoRiego, HttpStatus.CREATED);
+        } catch (IllegalArgumentException e) {
+            // Esto se activará si la planta no se encuentra
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
         }
-
-        Optional<Planta> optionalPlanta = plantaService.getPlantaById(riego.getPlanta().getIdPlanta());
-        if (optionalPlanta.isEmpty()) {
-            return new ResponseEntity("Planta no encontrada.", HttpStatus.NOT_FOUND);
-        }
-        riego.setPlanta(optionalPlanta.get()); // Asignar la planta completa al objeto riego
-
-        Riego nuevoRiego = riegoService.registrarRiego(riego);
-        return new ResponseEntity<>(nuevoRiego, HttpStatus.CREATED);
     }
+
     
     // GET /api/riegos/{id}
     @GetMapping("/{id}")

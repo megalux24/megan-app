@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.megan.service;
 
 import com.megan.model.Notificacion;
@@ -14,43 +10,44 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-/**
- *
- * @author lucasayala
- */
 @Service
 public class NotificacionService {
-    
+
     private final NotificacionRepository notificacionRepository;
-    
+
     @Autowired
     public NotificacionService(NotificacionRepository notificacionRepository) {
         this.notificacionRepository = notificacionRepository;
     }
-    
-    // Método para crear y guardar una nueva notificación
+
+    // Método para crear y guardar una nueva notificación con una planta
     public Notificacion crearNotificacion(Usuario usuario, Planta planta, String texto) {
         Notificacion notificacion = new Notificacion(usuario, planta, texto, LocalDateTime.now(), false);
         return notificacionRepository.save(notificacion);
     }
-    
-    // Método para crear una notifiación sin planta específica
+
+    // Método para crear una notificación sin planta específica
     public Notificacion crearNotificacion(Usuario usuario, String texto) {
         Notificacion notificacion = new Notificacion(usuario, null, texto, LocalDateTime.now(), false);
         return notificacionRepository.save(notificacion);
     }
-    
+
+    // Método para obtener todas las notificaciones de la base de datos.
+    public List<Notificacion> findAll() {
+        return notificacionRepository.findAll();
+    }
+
+    // Obtener todas las notificaciones de un usuario
     public List<Notificacion> getNotificacionesByUsuario(Usuario usuario) {
         return notificacionRepository.findByUsuario(usuario);
     }
-    // En este método, con el AndLeidaFalse, el and añade la condición de que el campo Leida sea false
-    // Spring Data JPA es una abstracción que se encarga de generar la consulta SQL con esa condición
+
+    // Obtener notificaciones no leídas de un usuario
     public List<Notificacion> getNotificacionesNoLeidasByUsuario(Usuario usuario) {
         return notificacionRepository.findByUsuarioAndLeidaFalse(usuario);
     }
-    
-    //busca una notificación por su ID, si la encuentra, actualiza su estado a "leída" en la base de datos 
-    //y devuelve la notificación actualizada. Si no la encuentra, devuelve un Optional vacío.
+
+    // Marcar una notificación como leída
     public Optional<Notificacion> marcarComoLeida(Long idNotificacion) {
         Optional<Notificacion> optionalNotificacion = notificacionRepository.findById(idNotificacion);
         if (optionalNotificacion.isPresent()) {
@@ -58,11 +55,11 @@ public class NotificacionService {
             notificacion.setLeida(true);
             return Optional.of(notificacionRepository.save(notificacion));
         }
-        return Optional.empty();                
+        return Optional.empty();
     }
-    
+
+    // Eliminar una notificación
     public void eliminarNotificacion(Long idNotificacion) {
         notificacionRepository.deleteById(idNotificacion);
     }
-        
 }
