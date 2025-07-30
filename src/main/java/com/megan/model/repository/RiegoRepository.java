@@ -18,4 +18,5 @@ public interface RiegoRepository extends JpaRepository<Riego, Long> {
     
     List<Riego> findByPlanta(Planta planta);
     Riego findTopByPlantaOrderByFechaHoraRiegoDesc(Planta planta);
+    
 }

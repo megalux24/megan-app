@@ -11,6 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import com.megan.controller.PlantaDetailsDTO;
+import com.megan.model.Riego;
+import com.megan.model.repository.RiegoRepository;
 
 @Service
 public class PlantaService {
@@ -18,12 +21,14 @@ public class PlantaService {
     private final PlantaRepository plantaRepository;
     private final NotificacionService notificacionService;
     private final NotificacionRepository notificacionRepository;
+    private final RiegoRepository riegoRepository;
 
     @Autowired
-    public PlantaService(PlantaRepository plantaRepository, NotificacionService notificacionService, NotificacionRepository notificacionRepository) {
+    public PlantaService(PlantaRepository plantaRepository, NotificacionService notificacionService, NotificacionRepository notificacionRepository, RiegoRepository riegoRepository) {
         this.plantaRepository = plantaRepository;
         this.notificacionService = notificacionService;
         this.notificacionRepository = notificacionRepository;
+        this.riegoRepository = riegoRepository;
     }
 
     public Planta crearPlanta(Planta planta) {
@@ -34,7 +39,7 @@ public class PlantaService {
         return plantaRepository.findById(id);
     }
 
-    // --- ESTE ES EL MÉTODO CORREGIDO QUE EVITA EL StackOverflowError ---
+    // --- MÉTODO CORREGIDO QUE EVITA EL StackOverflowError ---
     public List<Planta> getPlantasByUsuario(Usuario usuario) {
         List<Planta> plantas = plantaRepository.findByUsuario(usuario);
         
@@ -46,6 +51,24 @@ public class PlantaService {
         
         return plantas;
     }
+    
+    public Optional<PlantaDetailsDTO> getPlantaDetailsById(Long id) {
+        // Buscamos la planta
+        Optional<Planta> plantaOpt = plantaRepository.findById(id);
+
+        if (plantaOpt.isEmpty()) {
+            return Optional.empty();
+        }
+
+        Planta planta = plantaOpt.get();
+        // Buscamos su último riego usando el nuevo método del repositorio
+        Riego ultimoRiego = riegoRepository.findTopByPlantaOrderByFechaHoraRiegoDesc(planta);
+
+        // Creamos y devolvemos el DTO con toda la información
+        PlantaDetailsDTO detailsDTO = new PlantaDetailsDTO(planta, ultimoRiego);
+        return Optional.of(detailsDTO);
+    }
+
 
     public Planta updatePlanta(Long id, Planta plantaDetails) {
         Optional<Planta> optionalPlanta = plantaRepository.findById(id);

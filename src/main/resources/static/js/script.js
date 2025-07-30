@@ -208,19 +208,30 @@ function renderPlants(plants) {
 }
 
 // Mostrar detalles de la planta en una alerta
+// Mostrar detalles de la planta en una alerta
 async function showPlantDetails(plantId) {
     try {
+        // La petición al backend no cambia
         const response = await fetch(`${API_BASE_URL}/plantas/${plantId}`, { headers: getAuthHeaders() });
+
         if (response.ok) {
-            const planta = await response.json();
+            const planta = await response.json(); // Ahora recibimos el DTO
+
+            // Formateamos las fechas para que se vean bien
+            const fechaAdquisicion = planta.fechaAdquisicion ? new Date(planta.fechaAdquisicion).toLocaleDateString() : 'N/A';
+            const ultimoRiego = planta.ultimaFechaRiego ? new Date(planta.ultimaFechaRiego).toLocaleString() : 'Nunca';
+
+            // Construimos el mensaje del alert con la nueva información
             let details = `Detalles de la Planta:\n\n` +
                           `Nombre Común: ${planta.nombreComun || 'N/A'}\n` +
                           `Nombre Científico: ${planta.nombreCientifico || 'N/A'}\n` +
                           `Ubicación: ${planta.ubicacion || 'N/A'}\n` +
-                          `Fecha de Adquisición: ${planta.fechaAdquisicion ? new Date(planta.fechaAdquisicion).toLocaleDateString() : 'N/A'}\n` +
-                          `Notas: ${planta.notas || 'N/A'}\n` +
+                          `Fecha de Adquisición: ${fechaAdquisicion}\n` +
+                          `Notas de la Planta: ${planta.notas || 'N/A'}\n\n` +
                           `Frecuencia de Riego: ${planta.frecuenciaRiegoDias ? `${planta.frecuenciaRiegoDias} días` : 'No definida'}\n` +
-                          `Último Riego: ${planta.ultimaFechaRiego ? new Date(planta.ultimaFechaRiego).toLocaleString() : 'Nunca'}\n`;
+                          `Último Riego: ${ultimoRiego}\n` +
+                          `Observaciones del Último Riego: ${planta.ultimasObservacionesRiego || 'N/A'}\n`; // <-- ¡AQUÍ ESTÁ LA NUEVA LÍNEA!
+
             alert(details);
         } else {
             alert('No se pudieron cargar los detalles de la planta.');

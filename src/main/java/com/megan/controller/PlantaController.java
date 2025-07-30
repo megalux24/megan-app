@@ -69,11 +69,11 @@ public class PlantaController {
 
     // GET /api/plantas/{id}
     @GetMapping("/{id}")
-    public ResponseEntity<Planta> getPlantaById(@PathVariable Long id) {
-        Optional<Planta> planta = plantaService.getPlantaById(id);
-        return planta.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
-                     .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
-    }
+    public ResponseEntity<?> getPlantaById(@PathVariable Long id) { // Cambiamos el tipo de retorno a ResponseEntity<?>
+    Optional<PlantaDetailsDTO> plantaDetails = plantaService.getPlantaDetailsById(id);
+    return plantaDetails.<ResponseEntity<?>>map(dto -> new ResponseEntity<>(dto, HttpStatus.OK))
+                          .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+}
 
     // Endpoint para obtener todas las plantas de un usuario específico
     // GET /api/plantas/usuario/{userId}
