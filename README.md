@@ -1,280 +1,130 @@
-# Megan: Tu Asistente Personal para el Cuidado de Plantas
+# Megan: Tu Asistente de Plantas 🌱
 
-Megan es una aplicación backend (API RESTful) diseñada para ayudar a los amantes de las plantas a gestionar y cuidar sus colecciones. Permite a los usuarios registrar sus plantas, llevar un seguimiento de los riegos, y recibir notificaciones personalizadas sobre el cuidado de sus plantas.
+![Java](https://img.shields.io/badge/Java-17+-orange?style=for-the-badge&logo=java)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.x-6DB33F?style=for-the-badge&logo=spring-boot)
+![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?style=for-the-badge&logo=mysql)
+![JavaScript](https://img.shields.io/badge/JavaScript-ES6-F7DF1E?style=for-the-badge&logo=javascript)
 
-Este proyecto backend está construido con Spring Boot y utiliza MySQL como base de datos.
+## Descripción
 
-## Características Principales
+En la vorágine del día a día, es fácil olvidar tareas importantes como el cuidado de nuestras plantas. Megan nace para resolver este problema, ofreciendo una solución digital y centralizada para la gestión del cuidado de plantas.
 
-- Gestión de Usuarios: Registro y autenticación segura de usuarios.
+En mi caso en particular, al tener una colección numerosa de plantas, me tomaba mucho tiempo tomar notas y configurar recordatorios para evitar el sobreriego o que se sequen. Ahora, con Megan, garantizo el registro adecuado de los riegos, me ahorro tiempo y mis plantas lucen notablemente contentas.
 
-- Gestión de Plantas: CRUD (Crear, Leer, Actualizar, Eliminar) de plantas, incluyendo la capacidad de almacenar fotos.
+El proyecto está dirigido a cualquier persona, desde **principiantes en jardinería** que necesitan ayuda y seguimiento, hasta **amantes de las plantas con colecciones grandes** o **personas ocupadas** que se benefician de un sistema de registro y notificaciones para mantener sus plantas saludables. El enfoque principal del proyecto fue desarrollar una arquitectura de backend robusta, modular y segura, sentando las bases para un producto escalable.
 
-- Registro de Riegos: Seguimiento detallado de cada evento de riego por planta.
+## ✨ Funcionalidades Principales
 
-- Sistema de Notificaciones: Generación y gestión de notificaciones (ej., recordatorios de riego, confirmaciones).
+* **👤 Gestión de Usuarios:** Sistema completo de registro e inicio de sesión con Spring Security y contraseñas encriptadas (BCrypt).
+* **🌿 CRUD de Plantas:** Los usuarios pueden añadir, ver, editar y eliminar sus plantas, incluyendo una foto para cada una (`multipart/form-data`).
+* **💧 Registro de Riegos:** Funcionalidad para anotar cada evento de riego, actualizando automáticamente la fecha de último riego de la planta.
+* **🔔 Sistema de Notificaciones:** Notificaciones en tiempo real para confirmar acciones clave como el registro de un riego.
+* **🔒 API Segura:** Todos los endpoints que manejan datos personales están protegidos y requieren autenticación. La comunicación se realiza de forma segura a través de **HTTPS/TLS**.
 
-## Tecnologías Utilizadas
+## 🛠️ Stack Tecnológico
 
-### Backend
+* **Backend:**
+    * Java 17+ y Spring Boot 3
+    * Spring Security (Autenticación Basic)
+    * JPA / Hibernate (ORM)
+    * MySQL 8.0+
+    * Maven (Gestión de Dependencias)
+* **Frontend:**
+    * HTML5 y CSS3 (con Tailwind CSS)
+    * JavaScript (Vanilla JS, Fetch API)
 
-- Java 17: Lenguaje de programación.
+## 🚀 Instalación y Despliegue Local
 
-- Spring Boot 3.4.7: Framework para el desarrollo rápido de aplicaciones Java.
-
-- Spring Data JPA: Abstracción para la persistencia de datos con Hibernate.
-
-- Spring Security: Para el hashing de contraseñas y seguridad básica.
-
-- Apache Tomcat (Embebido): Servidor web para servir la API REST.
-
-### Base de Datos
-
-- MySQL 8.0+: Base de datos relacional.
-
-- HikariCP: Pool de conexiones JDBC de alto rendimiento.
-
-### Herramientas de Construcción y Gestión
-
-- Maven: Herramienta de gestión de proyectos y construcción.
-
-## Configuración y Ejecución del Backend
+Sigue estos pasos para ejecutar el proyecto en tu máquina local.
 
 ### Requisitos Previos
 
-- Java Development Kit (JDK) 17 o superior.
+-   Java Development Kit (JDK) 17 o superior.
+-   MySQL Server 8.0 o superior.
+-   Apache Maven 3.6+
 
-- MySQL Server 8.0 o superior.
+### Pasos
 
-- Un cliente MySQL (ej. MySQL Workbench).
+1.  **Clonar el Repositorio**
+    git clone https://github.com/megalux24/megan-app.git
+    cd megan-app
 
-- Apache NetBeans IDE.
+2.  **Configurar la Base de Datos**
+    -   Conéctate a tu instancia local de MySQL.
+    -   Crea la base de datos: `CREATE DATABASE megan_db;`
+    -   **Importante:** Ejecuta el script `src/main/resources/sql/schema.sql` que se encuentra en este repositorio. Este script creará todas las tablas con los tipos de datos correctos, especialmente `LONGBLOB` para las imágenes, evitando problemas con la generación automática de Hibernate.
 
-### 1. Configuración de la Base de Datos MySQL
+3.  **Configurar la Aplicación**
+    -   Abre el fichero `src/main/resources/application.properties`.
+    -   Modifica los valores de `spring.datasource.username` y `spring.datasource.password` para que coincidan con tus credenciales de MySQL.
+    -   Asegúrate de que spring.jpa.hibernate.ddl-auto esté en validate. Esto garantizará que la estructura creada por el script SQL no sea alterada accidentalmente por la aplicación, que fue uno de los problemas abordados durante el desarrollo.
 
-### 1.1 Crear la Base de Datos:
+4.  **Generar el Certificado SSL/TLS (para HTTPS)**
+    -   Desde la carpeta raíz del proyecto en tu terminal, ejecuta el siguiente comando:
+    ```bash
+    keytool -genkeypair -alias megan -keyalg RSA -keysize 2048 -storetype PKCS12 -keystore src/main/resources/keystore.p12 -validity 365 -dname "CN=localhost"
+    ```
+    -   Introduce una contraseña cuando se te pida (ej: `password`) y asegúrate de que coincida con la propiedad `server.ssl.key-store-password` en `application.properties`.
 
-Abrir el cliente MySQL y ejecutar el siguiente comando para crear la base de datos:
+5.  **Construir y Ejecutar**
+    -   **Opción A (Usando Maven en la terminal):**
+        ```bash
+        mvn spring-boot:run
+        ```
+    -   **Opción B (Desde tu IDE):**
+        -   Abre el proyecto como un proyecto de Maven.
+        -   Clean & Build.
+        -   Ejecutar.
 
-CREATE DATABASE IF NOT EXISTS `megan_db`;
+6.  **Acceder a la Aplicación**
+    -   Abre tu navegador y ve a: **`https://localhost:8080`**
+    -   Acepta la advertencia de seguridad del navegador (el certificado es autofirmado).
 
-### 1.2 Crear Tablas y Estructura:
+El proyecto actual sienta una base sólida. Las siguientes mejoras se proponen para futuras iteraciones:
 
-El script SQL completo que define las tablas usuarios, plantas, riegos y notificaciones se encuentra en src/main/resources/sql.
-
- Es importante asegurarse de que los tipos de datos de los IDs sean BIGINT para compatibilidad con Java Long.
-
-
-### 2. Configuración del Proyecto Spring Boot
-
-### 2.1 Clonar el Repositorio:
-
-git clone https://github.com/megalux24/megan-app.git
-cd megan
-
-### 2.2 Configurar application.properties:
-
-Crear o editar el archivo src/main/resources/application.properties y añade la configuración de tu base de datos:
-
-spring.datasource.url=jdbc:mysql://localhost:3306/megan_db?useSSL=false&serverTimezone=UTC
-spring.datasource.username=usuario_mysql
-spring.datasource.password=contrasenya_mysql
-spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
-spring.jpa.hibernate.ddl-auto=update # update define el comportamiento de hibernate con la DB, es importante tener en cuenta que en otros entornos (producción por ej.) debe cambiar
-spring.jpa.show-sql=true
-spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect # Opcional en MySQL 8+
-
-Importante: Reemplazar usuario_mysql y contrasenya_mysql con tus credenciales reales de MySQL.
-
-### 3. Ejecutar la Aplicación
-
-Desde Apache NetBeans:
-
-1. Abre el proyecto megan.
-
-2. Navega a src/main/java/com/megan/MeganApplication.java.
-
-3. Haz clic derecho sobre MeganApplication.java y selecciona "Run File".
-
-La aplicación se iniciará y estará disponible en http://localhost:8080.
-
-## Endpoints de la API REST 
-
-La API está disponible en http://localhost:8080/api/. Aquí se listan los principales endpoints:
-
-### Usuarios (/api/usuarios) 
-
-### POST /api/usuarios/registrar 
-
-+ Descripción: Registra un nuevo usuario. La contraseña se hashea antes de guardarse. 
-
-+ Cuerpo de la solicitud (JSON) 
-
-{
-    "nombre": "Nombre del Usuario",
-    "email": "email@example.com",
-    "password": "contraseñaSegura123"
-}
-
-+ Respuestas: 201 Created (éxito), 409 Conflict (email ya existe), 500 Internal Server Error.
-
-### POST /api/usuarios/login 
-
-+ Descripción: Autentica un usuario.
-
-+ Cuerpo de la solicitud (JSON) 
-
-{
-    "email": "email@example.com",
-    "password": "contraseñaSegura123"
-}
-
-+ Respuestas: 200 OK (éxito), 400 Bad Request (datos faltantes), 401 Unauthorized (credenciales inválidas).
-
-### GET /api/usuarios/{id} 
-
-+ Descripción: Obtiene un usuario por su ID.
-
-+ Respuestas 200 OK (usuario encontrado), 404 Not Found. 
-
-### GET /api/usuarios 
-
-+ Descripción: Obtiene una lista de todos los usuarios. 
-
-+ Respuestas: 200 OK. 
-
-### PUT /api/usuarios/{id}
-
-+ Descripción: Actualiza la información de un usuario.
-
-+ Cuerpo de la solicitud (JSON): (Ejemplo para update de nombre y email)
-
-{
-    "nombre": "Nuevo Nombre",
-    "email": "nuevo_email@example.com"
-}
-
-+ Respuestas: 200 OK (actualizado), 404 Not Found. 
-
-### DELETE /api/usuarios/{id} 
-
-+ Descripción: Elimina un usuario por su ID. 
-
-+ Respuestas: 204 No Content. 
+* **Implementación de Recordatorios Proactivos:** Activar y mejorar la lógica de negocio para generar notificaciones de riego pendientes, utilizando tareas programadas en el backend (`@Scheduled`) para un sistema de alertas completamente autónomo.
+* **Desarrollo de Pruebas Automatizadas:** Desarrollar un conjunto de pruebas unitarias (JUnit, Mockito) y de integración (Spring Boot Test) para automatizar la validación del backend, facilitando el mantenimiento y la escalabilidad.
+* **Evolución del Sistema de Autenticación:** Migrar del sistema de autenticación básica actual a un esquema basado en tokens (ej. JWT - JSON Web Tokens), que es el estándar moderno para APIs REST y SPAs.
+* **Integración con APIs Externas:** Conectar la aplicación a una API meteorológica para ajustar las sugerencias de riego de plantas de exterior según el clima.
+* **Notificaciones PUSH:** Implementar notificaciones push a través de Service Workers en el navegador para que los recordatorios lleguen al usuario incluso si no tiene la aplicación abierta.
 
 
-### Plantas (/api/plantas)
+<br>
 
+<details>
+<summary>📚 Documentación de Endpoints de la API</summary>
 
-### POST /api/plantas 
+### Usuarios (`/api/usuarios`)
+-   `POST /registrar`: Registra un nuevo usuario.
+-   `POST /login`: Autentica un usuario.
 
-+ Descripción: Crea una nueva plantas, opcionalmente con una foto.
+### Plantas (`/api/plantas`)
+-   `POST /`: Crea una nueva planta.
+    -   **Tipo:** `multipart/form-data`
+    -   **Partes:**
+        1.  `planta` (texto): Un string JSON con los datos de la planta.
+        2.  `foto` (fichero): El archivo de imagen (opcional).
+        3.  `idUsuario` (parámetro): El ID del usuario propietario.
+-   `GET /{id}`: Obtiene los detalles de una planta (incluye observaciones del último riego).
+-   `GET /usuario/{userId}`: Obtiene todas las plantas de un usuario.
+-   `PUT /{id}`: Actualiza una planta existente.
+-   `DELETE /{id}`: Elimina una planta.
 
-+ Cuerpo de la solicitud (multipart/form-data):
-    - planta(tipo Text): JSON String de los datos de la planta. Debe incluir usuario: {"idUsuario":
-      ID_DEL_USUARIO}
+### Riegos (`/api/riegos`)
+
+-   `POST /`: Registra un **nuevo evento de riego** para una planta.
+    -   **Cuerpo (JSON):**
+        ```json
         {
-            "usuario": {"idUsuario": 1},
-            "nombreComun": "Monstera Deliciosa",
-            "nombreCientifico": "Monstera deliciosa",
-            "ubicacion": "Sala de estar",
-            "fechaAdquisicion": "2023-01-15",
-            "notas": "Necesita mucha luz indirecta.",
-            "frecuenciaRiegoDias": 7
+          "plantaId": 1,
+          "cantidadAguaMl": 250.5,
+          "observaciones": "La tierra estaba bastante seca."
         }
+        ```
+-   `GET /planta/{plantaId}`: Obtiene el **historial completo de riegos** para una planta específica.
 
-+ Respuestas: 201 Created, 400 Bad Request, 404 Not Found (usuario inexistente), 500 Internal
-Server Error. 
+### Notificaciones (`/api/notificaciones`)
+-   `GET /usuario/{userId}`: Obtiene todas las notificaciones de un usuario.
+-   `PUT /{id}/marcar-leida`: Marca una notificación como leída.
 
-### GET /api/plantas/{id} 
-
-+ Descripción: Obtiene plantas por su ID.
-
-+ Respuestas 200 OK, 404 Not Found. 
-
-### GET /api/plantas/usuario/{userID}
-
-+ Descripción: Obtiene todas las plantas de un usuario específico. 
-
-+ Respuestas: 200 OK, 404 Not Found (usuario inexistente).
-
-### PUT /api/plantas/{id}
-
-+ Descripción: Actualiza una planta existente, opcionalmente con una nueva foto. 
-
-+ Cuerpo de la solicitud (multipart/form-data): Similar al POST, pero para actualizar. 
-
-+ Respuestas: 200 OK, 400 Bad Request, 404 Not Found. 
-
-### DELETE /api/plantas/{id}
-
-+ Descripción: Elimina una planta por su ID. 
-
-+ Respuestas: 204 No Content. 
-
-
-### Riegos (/api/riegos) 
-
-
-### POST /api/riegos 
-
-+ Descripción: Regitra un nuevo evento de riego para una planta. Genera una notificación de confirmación.
-
-+ Cuerpo de la Solicitud (JSON): 
-
-{
-    "planta": {"idPlanta": 1},
-    "cantidadAguaMl": 500.00,
-    "observaciones": "Riego abundante, la tierra estaba muy seca."
-}
-
-+ Respuestas: 201 Created, 400 Bad Request, 404 Not Found (planta inexistente).
-
-### GET /api/riegos/{id}
-
-+ Descripción: Obtiene un registro de riego por su ID.
-
-+ Respuestas: 200 OK, 404 Not Found.
-
-### GET /api/riegos/planta/{plantaId}
-
-+ Descripción: Obtiene todos los registros de riego para una planta específica.
-
-+ Respuestas: 200 OK, 404 Not Found (si la planta no existe).
-
-### DELETE /api/riegos/{id}
-
-+ Descripción: Elimina un registro de riego por su ID.
-
-+ Respuestas: 204 No Content.
-
-
-### Notificaciones (/api/notificaciones)
-
-
-### GET /api/notificaciones/usuario/{userId}
-
-+ Descripción: Obtiene todas las notificaciones (leídas y no leídas) para un usuario.
-
-+ Respuestas: 200 OK, 404 Not Found (si el usuario no existe).
-
-### GET /api/notificaciones/usuario/{userId}/no-leidas
-
-+ Descripción: Obtiene solo las notificaciones no leídas para un usuario.
-
-+ Respuestas: 200 OK, 404 Not Found (si el usuario no existe).
-
-### PUT /api/notificaciones/{id}/marcar-leida
-
-+ Descripción: Marca una notificación específica como leída (actualizar su estado).
-
-+ Respuestas: 200 OK (actualizada), 404 Not Found.
-
-### DELETE /api/notificaciones/{id}
-
-+ Descripción: Elimina una notificación por su ID.
-
-+ Respuestas: 204 No Content.
-
-
-
+</details>
