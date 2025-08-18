@@ -25,7 +25,14 @@ public class Planta {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_usuario", nullable = false)
     private Usuario usuario;
-
+    
+    // --- NUEVO CAMPO TRANSITORIO PARA ESCALABILIDAD DE MEGAN (INDICADOR VISUAL DEL ESTADO DE RIEGO ---
+    // La anotación @Transient le dice a JPA/Hibernate que este campo
+    // es solo para la lógica de la aplicación y NO debe ser persistido
+    // en la base de datos. Es un campo "fantasma" para la BBDD.
+    @Transient
+    private int estadoRiego;
+    
     @Column(name = "nombre_comun", nullable = false, length = 100)
     private String nombreComun;
 
@@ -105,6 +112,14 @@ public class Planta {
         this.usuario = usuario;
     }
 
+    public int getEstadoRiego() {
+        return estadoRiego;
+    }
+
+    public void setEstadoRiego(int estadoRiego) {
+        this.estadoRiego = estadoRiego;
+    }
+        
     public String getNombreComun() {
         return nombreComun;
     }

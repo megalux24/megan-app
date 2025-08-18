@@ -14,6 +14,7 @@ import java.util.Optional;
 import com.megan.controller.PlantaDetailsDTO;
 import com.megan.model.Riego;
 import com.megan.model.repository.RiegoRepository;
+import java.time.temporal.ChronoUnit; 
 
 @Service
 public class PlantaService {
@@ -39,18 +40,48 @@ public class PlantaService {
         return plantaRepository.findById(id);
     }
 
-    // --- MÉTODO CORREGIDO QUE EVITA EL StackOverflowError ---
+    // --- MÉTODO PRINCIPAL MODIFICADO ---
     public List<Planta> getPlantasByUsuario(Usuario usuario) {
+        // 1. Obtenemos las plantas de la base de datos
         List<Planta> plantas = plantaRepository.findByUsuario(usuario);
         
-        /*
-        La lógica para crear notificaciones se ha comentado porque causaba la recursión infinita.
-        Una petición GET (obtener datos) nunca debe modificar datos en el servidor.
-        Esta funcionalidad debería implementarse de otra forma, como una tarea programada.
-        */
+        // 2. "Enriquecemos" cada planta con su estado de riego calculado
+        plantas.forEach(planta -> {
+            int estado = calcularEstadoRiego(planta);
+            planta.setEstadoRiego(estado);
+        });
         
         return plantas;
     }
+    
+    // --- NUEVO MÉTODO PRIVADO PARA LA LÓGICA DE CÁLCULO ---
+    private int calcularEstadoRiego(Planta planta) {
+        // Casos base: sin datos, la planta está en estado neutro/feliz.
+        if (planta.getUltimaFechaRiego() == null || planta.getFrecuenciaRiegoDias() == null || planta.getFrecuenciaRiegoDias() <= 0) {
+            return 1; // 1 = Feliz
+        }
+
+        LocalDateTime ahora = LocalDateTime.now();
+        long diasPasados = ChronoUnit.DAYS.between(planta.getUltimaFechaRiego(), ahora);
+        int frecuencia = planta.getFrecuenciaRiegoDias();
+
+        // Si los días pasados superan la frecuencia, la planta necesita agua urgentemente.
+        if (diasPasados >= frecuencia) {
+            return 4; // 4 = Triste, sedienta / Necesita riego
+        }
+
+        // Calculamos un porcentaje del ciclo de riego que ha transcurrido.
+        double porcentajeCiclo = (double) diasPasados / frecuencia;
+
+        if (porcentajeCiclo >= 0.75) {
+            return 3; // 3 = Empezando a tener sed
+        } else if (porcentajeCiclo >= 0.40) {
+            return 2; // 2 = Normal
+        } else {
+            return 1; // 1 = Feliz / Recién regada
+        }
+    }
+    
     
     public Optional<PlantaDetailsDTO> getPlantaDetailsById(Long id) {
         // Buscamos la planta
