@@ -18,6 +18,7 @@ El proyecto está dirigido a cualquier persona, desde **principiantes en jardine
 * **👤 Gestión de Usuarios:** Sistema completo de registro e inicio de sesión con Spring Security y contraseñas encriptadas (BCrypt).
 * **🌿 CRUD de Plantas:** Los usuarios pueden añadir, ver, editar y eliminar sus plantas, incluyendo una foto para cada una (`multipart/form-data`).
 * **💧 Registro de Riegos:** Funcionalidad para anotar cada evento de riego, actualizando automáticamente la fecha de último riego de la planta.
+* **📊Indicador Visual de Riego:** Iconos dinámicos en cada tarjeta que reflejan el estado de riego actual de la planta (feliz, normal, sedienta), calculado en tiempo real por el backend.
 * **🔔 Sistema de Notificaciones:** Notificaciones en tiempo real para confirmar acciones clave como el registro de un riego.
 * **🔒 API Segura:** Todos los endpoints que manejan datos personales están protegidos y requieren autenticación. La comunicación se realiza de forma segura a través de **HTTPS/TLS**.
 
